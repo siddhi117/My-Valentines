@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Valentine Surprise - Enhanced Edition</title>
+
+<!-- Romantic Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        overflow: hidden;
+        background: linear-gradient(135deg, #ff9a9e, #fecfef, #ffecd2);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    /* Floating hearts animation */
+    .heart {
+        position: fixed;
+        bottom: -10px;
+        font-size: 20px;
+        animation: floatUp 6s linear infinite;
+        opacity: 0.8;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    @keyframes floatUp {
+        0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0.8; }
+        100% { transform: translateY(-120vh) scale(1.8) rotate(360deg); opacity: 0; }
+    }
+
+    /* Centered container for screens */
+    .screen {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 40px;
+        border-radius: 25px;
+        width: 90%;
+        max-width: 500px;
+        text-align: center;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        animation: fadeIn 1s ease;
+        z-index: 10;
+    }
+
+    h2 {
+        font-family: 'Pacifico', cursive;
+        color: #e63950;
+        font-size: 32px;
+        margin-bottom: 25px;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    .buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 30px;
+        flex-wrap: wrap;
+    }
+
+    button {
+        padding: 15px 30px;
+        border: none;
+        border-radius: 30px;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    #yesBtn {
+        background: linear-gradient(135deg, #ff4d6d, #ff758c);
+        color: white;
+        box-shadow: 0 8px 20px rgba(255, 77, 109, 0.5);
+        transform: scale(1);
+        animation: glow 2s ease-in-out infinite;
+    }
+
+    @keyframes glow {
+        0%, 100% { box-shadow: 0 8px 20px rgba(255, 77, 109, 0.5); }
+        50% { box-shadow: 0 8px 30px rgba(255, 77, 109, 0.8), 0 0 20px rgba(255, 77, 109, 0.6); }
+    }
+
+    #yesBtn:hover {
+        transform: scale(1.05);
+        background: linear-gradient(135deg, #e63950, #ff4d6d);
+    }
+
+    #noBtn {
+        background-color: #ffd1dc;
+        color: #e63950;
+        position: relative;
+        box-shadow: 0 5px 15px rgba(255, 209, 220, 0.5);
+    }
+
+    #noBtn:hover {
+        background-color: #ffb3c1;
+    }
+
+    #message {
+        font-size: 20px;
+        color: #e63950;
+        font-weight: 600;
+        margin-top: 20px;
+        line-height: 1.6;
+    }
+
+    /* Taunt messages */
+    #tauntMessage {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 255, 255, 0.95);
+        padding: 15px 30px;
+        border-radius: 25px;
+        color: #e63950;
+        font-weight: 600;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        z-index: 9999;
+        animation: slideUp 0.5s ease;
+        max-width: 90%;
+        text-align: center;
+    }
+
+    @keyframes slideUp {
+        from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+        to { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+
+    /* Second screen styling */
+    #secondScreen {
+        display: none;
+        max-width: 600px;
+    }
+
+    .celebration-gif {
+        width: 100%;
+        max-width: 400px;
+        margin: 20px auto;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translate(-50%, -40%) scale(0.9); }
+        to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    /* Confetti */
+    .confetti {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background: #ff4d6d;
+        position: fixed;
+        top: -10px;
+        animation: confettiFall 3s linear;
+        z-index: 1;
+    }
+
+    @keyframes confettiFall {
+        to {
+            transform: translateY(100vh) rotate(360deg);
+            opacity: 0;
+        }
+    }
+
+    /* Fireworks effect */
+    .firework {
+        position: fixed;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        animation: fireworkExplode 1s ease-out forwards;
+        z-index: 1;
+    }
+
+    @keyframes fireworkExplode {
+        0% {
+            transform: translate(0, 0);
+            opacity: 1;
+        }
+        100% {
+            transform: translate(var(--tx), var(--ty));
+            opacity: 0;
+        }
+    }
+
+    /* Progress indicator for No button */
+    #progressIndicator {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 15px 25px;
+        border-radius: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        font-weight: 600;
+        color: #e63950;
+        z-index: 9999;
+        display: none;
+    }
+
+    .shake {
+        animation: shake 0.5s;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
+</style>
+</head>
+
+<body>
+
+<!-- Background Music -->
+<audio id="bgMusic" loop>
+    <source src="https://cdn.pixabay.com/download/audio/2023/03/14/audio_6e3f3f1e4d.mp3?filename=romantic-love-144094.mp3" type="audio/mpeg">
+</audio>
+
+<!-- Celebration Sound -->
+<audio id="celebrationSound">
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_4c35b8e6e4.mp3?filename=success-fanfare-trumpets-6185.mp3" type="audio/mpeg">
+</audio>
+
+<!-- Progress Indicator -->
+<div id="progressIndicator">Escape Attempts: <span id="attemptCount">0</span></div>
+
+<!-- FIRST SCREEN -->
+<div id="firstScreen" class="screen">
+    <h2 id="question">Will you be my valentine? 💝</h2>
+    <p style="color: #666; font-size: 16px; margin-top: 10px;">Choose wisely... 😏</p>
+
+    <div class="buttons">
+        <button id="yesBtn">Yes! 💕</button>
+        <button id="noBtn">No</button>
+    </div>
+</div>
+
+<!-- SECOND SCREEN -->
+<div id="secondScreen" class="screen">
+    <h2>I knew it! 🎉</h2>
+    
+    <img src="https://media.giphy.com/media/26u4cqiYI30juCOGY/giphy.gif" 
+         alt="Celebration" 
+         class="celebration-gif"
+         onerror="this.style.display='none'">
+    
+    <p id="message">
+        Congratulations Darpan! You are now officially<br>
+        <strong style="font-size: 24px; color: #ff4d6d;">Siddhi's Valentine ❤️ </strong><br>
+        forever and always! 💑
+    </p>
+    
+    <p style="color: #666; font-size: 14px; margin-top: 20px;">
+        (I mean, we both knew you'd say yes eventually 😄)
+    </p>
+</div>
+
+<script>
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const firstScreen = document.getElementById("firstScreen");
+    const secondScreen = document.getElementById("secondScreen");
+    const bgMusic = document.getElementById("bgMusic");
+    const celebrationSound = document.getElementById("celebrationSound");
+    const progressIndicator = document.getElementById("progressIndicator");
+    const attemptCount = document.getElementById("attemptCount");
+
+    let noHoverCount = 0;
+    let yesButtonScale = 1;
+    let tauntTimeout = null;
+
+    // Funny taunt messages
+    const tauntMessages = [
+        "Really? You're gonna make me work for this? 😏",
+        "The 'No' button is just decoration, you know... 💅",
+        "Come on, we both know how this ends! 💕",
+        "Seriously? You think you can escape? 😂",
+        "I've got all day... and that button is getting harder to catch! 🏃‍♀️",
+        "Your mouse skills are impressive, but futile! 🎯",
+        "Plot twist: The 'No' button was a lie all along! 🤥",
+        "This is getting ridiculous... just say yes! 😅",
+        "Are you training for the Mouse Olympics or something? 🏅",
+        "Fine, you win the cardio contest. Now say YES! 💪",
+        "Even Cupid is getting tired of waiting... 🏹",
+        "Breaking news: Local person still in denial! 📰",
+        "I admire your persistence... but YES is inevitable! ⏰",
+        "This is like trying to avoid your feelings... impossible! 💭",
+        "Fun fact: 100% of people who click YES are happy! 📊"
+    ];
+
+    // Start music on first interaction
+    function startMusic() {
+        bgMusic.play().catch(() => {});
+        document.removeEventListener("click", startMusic);
+    }
+    document.addEventListener("click", startMusic);
+
+    // YES BUTTON → Show second screen with celebration
+    yesBtn.addEventListener("click", () => {
+        // Play celebration sound
+        celebrationSound.play().catch(() => {});
+        
+        // Hide first screen
+        firstScreen.style.display = "none";
+        secondScreen.style.display = "block";
+        
+        // Create confetti explosion
+        createConfetti();
+        
+        // Create fireworks
+        setTimeout(() => createFireworks(), 500);
+        setTimeout(() => createFireworks(), 1000);
+        setTimeout(() => createFireworks(), 1500);
+        
+        // Hide progress indicator
+        progressIndicator.style.display = "none";
+    });
+
+    // NO BUTTON → Grow Yes button and move No button
+    let noBtnClickCount = 0;
+    
+    noBtn.addEventListener("mouseover", () => {
+        noHoverCount++;
+        attemptCount.textContent = noHoverCount;
+        
+        // Show progress indicator after first hover
+        if (noHoverCount === 1) {
+            progressIndicator.style.display = "block";
+        }
+
+        // Grow the Yes button progressively
+        yesButtonScale += 0.15;
+        yesBtn.style.transform = `scale(${yesButtonScale})`;
+        yesBtn.style.zIndex = "100";
+        
+        // Update Yes button text based on size
+        if (noHoverCount === 3) {
+            yesBtn.textContent = "YES! 💕 (Getting warmer...)";
+        } else if (noHoverCount === 6) {
+            yesBtn.textContent = "YES YES YES! 💕💕";
+        } else if (noHoverCount === 10) {
+            yesBtn.textContent = "OBVIOUSLY YES! 💕💕💕";
+            yesBtn.style.fontSize = "20px";
+        }
+
+        // Start dodging after 2 hovers
+        if (noHoverCount > 2) {
+            // Make No button smaller each time
+            const newSize = Math.max(0.5, 1 - (noHoverCount * 0.05));
+            noBtn.style.transform = `scale(${newSize})`;
+            
+            // Move the No button
+            noBtn.style.position = "fixed";
+            
+            const padding = 20;
+            const btnWidth = noBtn.offsetWidth || 80;
+            const btnHeight = noBtn.offsetHeight || 40;
+
+            const maxX = window.innerWidth - btnWidth - padding;
+            const maxY = window.innerHeight - btnHeight - padding;
+
+            const x = padding + Math.random() * (maxX - padding);
+            const y = padding + Math.random() * (maxY - padding);
+
+            noBtn.style.left = `${x}px`;
+            noBtn.style.top = `${y}px`;
+            
+            // Add shake effect to screen
+            if (noHoverCount % 3 === 0) {
+                firstScreen.classList.add('shake');
+                setTimeout(() => firstScreen.classList.remove('shake'), 500);
+            }
+        }
+
+        // Show taunt messages
+        if (noHoverCount > 2 && noHoverCount <= 17) {
+            showTauntMessage(tauntMessages[noHoverCount - 3]);
+        }
+
+        // Make No button nearly impossible to catch
+        if (noHoverCount > 8) {
+            noBtn.style.transition = "none";
+        }
+        
+        // After many attempts, make it super fast
+        if (noHoverCount > 12) {
+            noBtn.addEventListener("mouseenter", moveButtonAway);
+        }
+    });
+
+    // Additional mouse tracking for very evasive button
+    function moveButtonAway(e) {
+        if (noHoverCount > 12) {
+            const padding = 50;
+            const btnWidth = noBtn.offsetWidth || 80;
+            const btnHeight = noBtn.offsetHeight || 40;
+
+            const maxX = window.innerWidth - btnWidth - padding;
+            const maxY = window.innerHeight - btnHeight - padding;
+
+            const x = padding + Math.random() * (maxX - padding);
+            const y = padding + Math.random() * (maxY - padding);
+
+            noBtn.style.left = `${x}px`;
+            noBtn.style.top = `${y}px`;
+        }
+    }
+
+    // Prevent clicking No button (just for fun)
+    noBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        noBtnClickCount++;
+        
+        if (noBtnClickCount === 1) {
+            showTauntMessage("Nice try! But clicking won't help you! 😈");
+        } else if (noBtnClickCount === 2) {
+            showTauntMessage("Still trying to click 'No'? That's adorable! 🥰");
+        } else {
+            showTauntMessage("You're persistent, I'll give you that! But the answer is YES! 💝");
+        }
+        
+        // Move button even on click
+        noBtn.style.position = "fixed";
+        const x = Math.random() * (window.innerWidth - 100);
+        const y = Math.random() * (window.innerHeight - 50);
+        noBtn.style.left = `${x}px`;
+        noBtn.style.top = `${y}px`;
+    });
+
+    // Show taunt message
+    function showTauntMessage(message) {
+        // Remove existing taunt
+        const existing = document.getElementById("tauntMessage");
+        if (existing) existing.remove();
+        
+        const taunt = document.createElement("div");
+        taunt.id = "tauntMessage";
+        taunt.textContent = message;
+        document.body.appendChild(taunt);
+
+        if (tauntTimeout) clearTimeout(tauntTimeout);
+        tauntTimeout = setTimeout(() => taunt.remove(), 3000);
+    }
+
+    // Floating hearts generator
+    function createHeart() {
+        const heart = document.createElement("div");
+        heart.classList.add("heart");
+        const heartSymbols = ["❤️", "💕", "💖", "💗", "💝", "💘"];
+        heart.textContent = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
+        heart.style.left = Math.random() * 100 + "vw";
+        heart.style.fontSize = (20 + Math.random() * 20) + "px";
+        heart.style.animationDuration = (4 + Math.random() * 4) + "s";
+
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 6000);
+    }
+
+    setInterval(createHeart, 500);
+
+    // Confetti explosion
+    function createConfetti() {
+        const colors = ['#ff4d6d', '#ffd1dc', '#ffb3c1', '#ff758c', '#fecfef'];
+        
+        for (let i = 0; i < 100; i++) {
+            setTimeout(() => {
+                const confetti = document.createElement("div");
+                confetti.classList.add("confetti");
+                confetti.style.left = Math.random() * 100 + "vw";
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDuration = (2 + Math.random() * 2) + "s";
+                confetti.style.animationDelay = Math.random() * 0.5 + "s";
+                
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }, i * 20);
+        }
+    }
+
+    // Fireworks effect
+    function createFireworks() {
+        const colors = ['#ff4d6d', '#ffd1dc', '#ffb3c1', '#ff758c'];
+        const x = Math.random() * window.innerWidth;
+        const y = Math.random() * (window.innerHeight / 2);
+        
+        for (let i = 0; i < 30; i++) {
+            const firework = document.createElement("div");
+            firework.classList.add("firework");
+            firework.style.left = x + "px";
+            firework.style.top = y + "px";
+            firework.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            const angle = (Math.PI * 2 * i) / 30;
+            const velocity = 50 + Math.random() * 100;
+            const tx = Math.cos(angle) * velocity;
+            const ty = Math.sin(angle) * velocity;
+            
+            firework.style.setProperty('--tx', tx + 'px');
+            firework.style.setProperty('--ty', ty + 'px');
+            
+            document.body.appendChild(firework);
+            setTimeout(() => firework.remove(), 1000);
+        }
+    }
+</script>
+
+</body>
+</html>
