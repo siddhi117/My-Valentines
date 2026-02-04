@@ -24,7 +24,7 @@ Extract the ZIP file
 Customize the names
 
 Open valentine-enhanced.html in any text editor
-Find line 335: Siddhi
+Find line 278 & 279.
 Replace with your names: YourName ❤️ TheirName
 Save the file
 
