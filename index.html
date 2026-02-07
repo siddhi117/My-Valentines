@@ -11,6 +11,8 @@
 <style>
     * {
         box-sizing: border-box;
+        margin: 0;
+        padding: 0;
     }
 
     body {
@@ -20,6 +22,9 @@
         background-size: 400% 400%;
         animation: gradientShift 15s ease infinite;
         font-family: 'Poppins', sans-serif;
+        min-height: 100vh;
+        width: 100vw;
+        position: relative;
     }
 
     @keyframes gradientShift {
@@ -36,6 +41,7 @@
         opacity: 0.8;
         pointer-events: none;
         z-index: 1;
+        will-change: transform;
     }
 
     @keyframes floatUp {
@@ -51,6 +57,7 @@
         transform: translate(-50%, -50%);
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
         padding: 40px;
         border-radius: 25px;
         width: 90%;
@@ -91,6 +98,9 @@
         transition: all 0.3s ease;
         font-weight: 600;
         font-family: 'Poppins', sans-serif;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+        -webkit-user-select: none;
     }
 
     #yesBtn {
@@ -99,6 +109,8 @@
         box-shadow: 0 8px 20px rgba(255, 77, 109, 0.5);
         transform: scale(1);
         animation: glow 2s ease-in-out infinite;
+        position: relative;
+        z-index: 50;
     }
 
     @keyframes glow {
@@ -116,10 +128,28 @@
         color: #e63950;
         position: relative;
         box-shadow: 0 5px 15px rgba(255, 209, 220, 0.5);
+        transition: all 0.2s ease;
     }
 
     #noBtn:hover {
         background-color: #ffb3c1;
+    }
+
+    /* No button when it starts moving */
+    #noBtn.moving {
+        position: fixed;
+        transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* No button text animations */
+    #noBtn.teasing {
+        animation: wiggle 0.5s ease-in-out;
+    }
+
+    @keyframes wiggle {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(-5deg); }
+        75% { transform: rotate(5deg); }
     }
 
     #message {
@@ -160,11 +190,14 @@
     }
 
     .celebration-gif {
-        width: 100%;
-        max-width: 400px;
+        width: 80%;
+        max-width: 290px;
         margin: 20px auto;
         border-radius: 15px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        object-fit: contain;
+        margin: 15px auto;
+        display: block;
     }
 
     @keyframes fadeIn {
@@ -178,10 +211,10 @@
         width: 10px;
         height: 10px;
         background: #ff4d6d;
-        position: fixed;
         top: -10px;
         animation: confettiFall 3s linear;
         z-index: 1;
+        will-change: transform;
     }
 
     @keyframes confettiFall {
@@ -199,6 +232,7 @@
         border-radius: 50%;
         animation: fireworkExplode 1s ease-out forwards;
         z-index: 1;
+        will-change: transform;
     }
 
     @keyframes fireworkExplode {
@@ -227,14 +261,47 @@
         display: none;
     }
 
+    /* Shake animation for screen */
     .shake {
         animation: shake 0.5s;
     }
 
     @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-10px); }
-        75% { transform: translateX(10px); }
+        0%, 100% { transform: translate(-50%, -50%); }
+        25% { transform: translate(-52%, -50%); }
+        75% { transform: translate(-48%, -50%); }
+    }
+
+    /* Mobile optimizations */
+    @media (max-width: 600px) {
+        .screen {
+            padding: 30px 20px;
+            width: 95%;
+        }
+
+        h2 {
+            font-size: 26px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+        }
+
+        #progressIndicator {
+            top: 10px;
+            right: 10px;
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+    }
+
+    /* Prevent text selection and dragging */
+    body {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
     }
 </style>
 </head>
@@ -269,14 +336,14 @@
 <div id="secondScreen" class="screen">
     <h2>I knew it! 🎉</h2>
     
-    <img src="https://media.giphy.com/media/26u4cqiYI30juCOGY/giphy.gif" 
+    <img src="Valentines Giphy.gif"
          alt="Celebration" 
          class="celebration-gif"
          onerror="this.style.display='none'">
     
     <p id="message">
         Congratulations Darpan! You are now officially<br>
-        <strong style="font-size: 24px; color: #ff4d6d;">Siddhi's Valentine ❤️ </strong><br>
+        <strong style="font-size: 24px; color: #ff4d6d;">Siddhi's Valentine ❤️</strong><br>
         forever and always! 💑
     </p>
     
@@ -298,8 +365,27 @@
     let noHoverCount = 0;
     let yesButtonScale = 1;
     let tauntTimeout = null;
+    let isMoving = false;
 
-    // Funny taunt messages
+    // Funny taunt messages for button text changes
+    const buttonTexts = [
+        "No",
+        "No",
+        "Nice try! 😏",
+        "You can't catch me! 🏃‍♀️",
+        "Still trying? 😂",
+        "Nope! 💨",
+        "Too slow! ⚡",
+        "Give up yet? 😎",
+        "Never! 🎯",
+        "Not happening! 🚫",
+        "Dream on! ✨",
+        "Impossible! 🦄",
+        "LOL 😅",
+        "Just say yes! 💕"
+    ];
+
+    // Taunt messages that appear at bottom
     const tauntMessages = [
         "Really? You're gonna make me work for this? 😏",
         "The 'No' button is just decoration, you know... 💅",
@@ -318,12 +404,43 @@
         "Fun fact: 100% of people who click YES are happy! 📊"
     ];
 
+    // Calculate safe movement boundaries
+    function getSafeBoundaries() {
+        const screenRect = firstScreen.getBoundingClientRect();
+        const btnRect = noBtn.getBoundingClientRect();
+        
+        // Define the play area (within the screen container but with padding)
+        const padding = 20; // Padding from screen edges
+        const minX = screenRect.left + padding;
+        const maxX = screenRect.right - btnRect.width - padding;
+        const minY = screenRect.top + padding + 100; // Extra space for title
+        const maxY = screenRect.bottom - btnRect.height - padding;
+        
+        return { minX, maxX, minY, maxY };
+    }
+
+    // Move button to random safe position
+    function moveButton() {
+        if (!isMoving) return;
+        
+        const boundaries = getSafeBoundaries();
+        
+        // Calculate random position within boundaries
+        const newX = boundaries.minX + Math.random() * (boundaries.maxX - boundaries.minX);
+        const newY = boundaries.minY + Math.random() * (boundaries.maxY - boundaries.minY);
+        
+        noBtn.style.left = `${newX}px`;
+        noBtn.style.top = `${newY}px`;
+    }
+
     // Start music on first interaction
     function startMusic() {
         bgMusic.play().catch(() => {});
         document.removeEventListener("click", startMusic);
+        document.removeEventListener("touchstart", startMusic);
     }
     document.addEventListener("click", startMusic);
+    document.addEventListener("touchstart", startMusic);
 
     // YES BUTTON → Show second screen with celebration
     yesBtn.addEventListener("click", () => {
@@ -346,10 +463,8 @@
         progressIndicator.style.display = "none";
     });
 
-    // NO BUTTON → Grow Yes button and move No button
-    let noBtnClickCount = 0;
-    
-    noBtn.addEventListener("mouseover", () => {
+    // NO BUTTON → Handle hover/touch with improved boundary control
+    function handleNoButtonInteraction() {
         noHoverCount++;
         attemptCount.textContent = noHoverCount;
         
@@ -358,103 +473,72 @@
             progressIndicator.style.display = "block";
         }
 
-        // Grow the Yes button progressively
-        yesButtonScale += 0.15;
-        yesBtn.style.transform = `scale(${yesButtonScale})`;
-        yesBtn.style.zIndex = "100";
-        
-        // Update Yes button text based on size
-        if (noHoverCount === 3) {
-            yesBtn.textContent = "YES! 💕 (Getting warmer...)";
-        } else if (noHoverCount === 6) {
-            yesBtn.textContent = "YES YES YES! 💕💕";
-        } else if (noHoverCount === 10) {
-            yesBtn.textContent = "OBVIOUSLY YES! 💕💕💕";
-            yesBtn.style.fontSize = "20px";
+        // Change button text
+        if (noHoverCount < buttonTexts.length) {
+            noBtn.textContent = buttonTexts[noHoverCount];
         }
 
-        // Start dodging after 2 hovers
-        if (noHoverCount > 2) {
-            // Make No button smaller each time
-            const newSize = Math.max(0.5, 1 - (noHoverCount * 0.05));
-            noBtn.style.transform = `scale(${newSize})`;
-            
-            // Move the No button
-            noBtn.style.position = "fixed";
-            
-            const padding = 20;
-            const btnWidth = noBtn.offsetWidth || 80;
-            const btnHeight = noBtn.offsetHeight || 40;
+        // Add wiggle animation
+        if (noHoverCount >= 2) {
+            noBtn.classList.add('teasing');
+            setTimeout(() => noBtn.classList.remove('teasing'), 500);
+        }
 
-            const maxX = window.innerWidth - btnWidth - padding;
-            const maxY = window.innerHeight - btnHeight - padding;
+        // Grow the Yes button progressively
+        yesButtonScale += 0.1;
+        yesBtn.style.transform = `scale(${yesButtonScale})`;
+        
+        // Update Yes button text based on size
+        if (noHoverCount === 4) {
+            yesBtn.textContent = "YES! 💕 (Getting warmer...)";
+        } else if (noHoverCount === 8) {
+            yesBtn.textContent = "YES YES YES! 💕💕";
+        } else if (noHoverCount === 12) {
+            yesBtn.textContent = "OBVIOUSLY YES! 💕💕💕";
+            yesBtn.style.fontSize = "22px";
+        }
 
-            const x = padding + Math.random() * (maxX - padding);
-            const y = padding + Math.random() * (maxY - padding);
-
-            noBtn.style.left = `${x}px`;
-            noBtn.style.top = `${y}px`;
-            
-            // Add shake effect to screen
-            if (noHoverCount % 3 === 0) {
-                firstScreen.classList.add('shake');
-                setTimeout(() => firstScreen.classList.remove('shake'), 500);
+        // Start moving after 2 attempts
+        if (noHoverCount >= 2) {
+            if (!isMoving) {
+                noBtn.classList.add('moving');
+                isMoving = true;
             }
+            moveButton();
         }
 
         // Show taunt messages
-        if (noHoverCount > 2 && noHoverCount <= 17) {
-            showTauntMessage(tauntMessages[noHoverCount - 3]);
+        if (noHoverCount >= 3 && noHoverCount <= 17) {
+            const messageIndex = Math.min(noHoverCount - 3, tauntMessages.length - 1);
+            showTauntMessage(tauntMessages[messageIndex]);
         }
 
-        // Make No button nearly impossible to catch
+        // Add shake effect to screen
+        if (noHoverCount % 5 === 0) {
+            firstScreen.classList.add('shake');
+            setTimeout(() => firstScreen.classList.remove('shake'), 500);
+        }
+
+        // Make button faster after 8 attempts
         if (noHoverCount > 8) {
-            noBtn.style.transition = "none";
-        }
-        
-        // After many attempts, make it super fast
-        if (noHoverCount > 12) {
-            noBtn.addEventListener("mouseenter", moveButtonAway);
-        }
-    });
-
-    // Additional mouse tracking for very evasive button
-    function moveButtonAway(e) {
-        if (noHoverCount > 12) {
-            const padding = 50;
-            const btnWidth = noBtn.offsetWidth || 80;
-            const btnHeight = noBtn.offsetHeight || 40;
-
-            const maxX = window.innerWidth - btnWidth - padding;
-            const maxY = window.innerHeight - btnHeight - padding;
-
-            const x = padding + Math.random() * (maxX - padding);
-            const y = padding + Math.random() * (maxY - padding);
-
-            noBtn.style.left = `${x}px`;
-            noBtn.style.top = `${y}px`;
+            noBtn.style.transition = "all 0.1s cubic-bezier(0.4, 0, 0.2, 1)";
         }
     }
+
+    // Mouse events
+    noBtn.addEventListener("mouseenter", handleNoButtonInteraction);
+    
+    // Touch events for mobile
+    noBtn.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        handleNoButtonInteraction();
+    });
 
     // Prevent clicking No button (just for fun)
     noBtn.addEventListener("click", (e) => {
         e.preventDefault();
-        noBtnClickCount++;
-        
-        if (noBtnClickCount === 1) {
-            showTauntMessage("Nice try! But clicking won't help you! 😈");
-        } else if (noBtnClickCount === 2) {
-            showTauntMessage("Still trying to click 'No'? That's adorable! 🥰");
-        } else {
-            showTauntMessage("You're persistent, I'll give you that! But the answer is YES! 💝");
-        }
-        
-        // Move button even on click
-        noBtn.style.position = "fixed";
-        const x = Math.random() * (window.innerWidth - 100);
-        const y = Math.random() * (window.innerHeight - 50);
-        noBtn.style.left = `${x}px`;
-        noBtn.style.top = `${y}px`;
+        handleNoButtonInteraction();
+        showTauntMessage("Clicking won't help! The only way out is to say YES! 💝");
     });
 
     // Show taunt message
@@ -469,7 +553,9 @@
         document.body.appendChild(taunt);
 
         if (tauntTimeout) clearTimeout(tauntTimeout);
-        tauntTimeout = setTimeout(() => taunt.remove(), 3000);
+        tauntTimeout = setTimeout(() => {
+            if (taunt.parentNode) taunt.remove();
+        }, 3000);
     }
 
     // Floating hearts generator
@@ -479,11 +565,13 @@
         const heartSymbols = ["❤️", "💕", "💖", "💗", "💝", "💘"];
         heart.textContent = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
         heart.style.left = Math.random() * 100 + "vw";
-        heart.style.fontSize = (20 + Math.random() * 20) + "px";
+        heart.style.fontSize = (15 + Math.random() * 15) + "px";
         heart.style.animationDuration = (4 + Math.random() * 4) + "s";
 
         document.body.appendChild(heart);
-        setTimeout(() => heart.remove(), 6000);
+        setTimeout(() => {
+            if (heart.parentNode) heart.remove();
+        }, 8000);
     }
 
     setInterval(createHeart, 500);
@@ -502,7 +590,9 @@
                 confetti.style.animationDelay = Math.random() * 0.5 + "s";
                 
                 document.body.appendChild(confetti);
-                setTimeout(() => confetti.remove(), 3000);
+                setTimeout(() => {
+                    if (confetti.parentNode) confetti.remove();
+                }, 4000);
             }, i * 20);
         }
     }
@@ -529,9 +619,22 @@
             firework.style.setProperty('--ty', ty + 'px');
             
             document.body.appendChild(firework);
-            setTimeout(() => firework.remove(), 1000);
+            setTimeout(() => {
+                if (firework.parentNode) firework.remove();
+            }, 1200);
         }
     }
+
+    // Handle window resize - recalculate boundaries
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            if (isMoving) {
+                moveButton();
+            }
+        }, 100);
+    });
 </script>
 
 </body>
